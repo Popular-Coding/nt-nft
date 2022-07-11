@@ -19,19 +19,11 @@ Our solution is to implement Non-Transferable NFTs within a Substrate pallet.
 At its core, our pallet is based off of Substrate's existing open source [Uniques pallet](https://github.com/paritytech/substrate/tree/master/frame/uniques).  From Uniques' base NFT implementation, we stripped out transferability and have modeled functionality for proposing and accepting NT-NFT assignments.  Proposals and acceptances are intended to prevent unwanted spam NT-NFTs from being assigned to individuals.  
 Additionally, we have added an optional expiration value which is aimed specifically at supporting impermanent credentials and memberships.
 
-### NT-NFT Creation and Assignment
-![](nt-nft-assign.png)
-### Certification
-![](nt-nft-certification.png)
-
-### Next Steps
-- Refine NT-NFT Pallets Implementation
-- Develop starter implementations for basic certification and membership use cases
-- Integrate the NT-NFT pallet into Ventur, a business process focused parachain
-- Create a testnet for Ventur and NT-NFT functionality
-
 ### Pallet Details
-#### Use Case Diagrams
+#### NT-NFT Creation and Assignment
+![](nt-nft-assign.png)
+#### Certification
+![](nt-nft-certification.png)
 #### Functions
 - create_collection
 - destroy_collection
@@ -44,6 +36,13 @@ Additionally, we have added an optional expiration value which is aimed specific
 - cancel_assignment
 - force_create
 - force_collection_status  
+
+### Next Steps
+- Refine NT-NFT Pallets Implementation
+- Develop starter implementations for basic certification and membership use cases
+- Integrate the NT-NFT pallet into Ventur, a business process focused parachain
+- Create a testnet for Ventur and NT-NFT functionality
+
 ## Related Modules
 
 * [`System`](https://docs.rs/frame-system/latest/frame_system/)
