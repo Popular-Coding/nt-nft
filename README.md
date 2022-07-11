@@ -22,8 +22,10 @@ Additionally, we have added an optional expiration value which is aimed specific
 ### Pallet Details
 #### NT-NFT Creation and Assignment
 ![](nt-nft-assign.png)
-#### Certification
-![](nt-nft-certification.png)
+#### Certification Scenario
+![](certification-example.jpg)
+#### Content Restriction Scenario
+![](restricted-content-example.jpg)
 #### Functions
 - create_collection
 - destroy_collection
