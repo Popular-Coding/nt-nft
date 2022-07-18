@@ -5,9 +5,9 @@ description = "FRAME pallet nt-nft for defining custom runtime logic."
 authors = ["Popular Coding <https://github.com/popular-coding>"]
 homepage = "https://www.popularcoding.com/"
 edition = "2021"
-license = "Unlicense"
+license = "MIT"
 publish = false
-repository = "https://github.com/substrate-developer-hub/substrate-node-template/"
+repository = "https://github.com/Popular-Coding/nt-nft"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
