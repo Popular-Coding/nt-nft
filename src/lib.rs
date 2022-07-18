@@ -21,6 +21,7 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type CollectionId: Member + Parameter + MaxEncodedLen + Copy;
 	}
 
 	#[pallet::pallet]
@@ -35,6 +36,11 @@ pub mod pallet {
 	// https://docs.substrate.io/v3/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;//To Be Updated
 
+	#[pallet::storage]
+	#[pallet::getter(fn collection)]
+	pub(super) type Collection<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, u32, ValueQuery>;
+
+
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/v3/runtime/events-and-errors
 	#[pallet::event]
@@ -45,14 +51,14 @@ pub mod pallet {
 
 		/// Permissionless
 		CreateCollection(u32, T::AccountId),
-        AssignNTNFT(u32, T::AccountId),
-		AcceptAssignment(u32, T::AccountId),
-		CancelAssignment(u32, T::AccountId),
+        AssignNTNFT(T::AccountId, u32, u32, T::AccountId),
+		AcceptAssignment(u32, u32, T::AccountId),
+		CancelAssignment(T::AccountId, u32, u32, T::AccountId),
 
 		/// Permissioned
 		DestroyCollection(u32, T::AccountId),
-		MintNTNFT(u32, T::AccountId),
-		BurnNTNFT(u32, T::AccountId),
+		MintNTNFT(u32, u32, T::AccountId),
+		BurnNTNFT(u32, u32, T::AccountId),
 		FreezeCollection(u32, T::AccountId),
 		ThawCollection(u32, T::AccountId),
 		DiscardNTNFT(u32, T::AccountId),
@@ -79,204 +85,204 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Dispatchable which creates a collection of nt-nfts
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn create_collection(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn create_collection(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Collection<T>>::insert(&who, collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::CreateCollection(something, who));
+			Self::deposit_event(Event::CreateCollection(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which assigns an ntnft to a wallet id
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn assign_ntnft(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn assign_ntnft(origin: OriginFor<T>, collection_id: u32, ntnft_id: u32, target_address: T::AccountId) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::AssignNTNFT(something, who));
+			Self::deposit_event(Event::AssignNTNFT(who, collection_id, ntnft_id, target_address));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows a signer to accept an ntnft assignment
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn accept_assignment(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn accept_assignment(origin: OriginFor<T>, collection_id: u32, ntnft_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::AcceptAssignment(something, who));
+			Self::deposit_event(Event::AcceptAssignment(collection_id, ntnft_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable that allows a signer to cancel an ntnft assignment
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn cancel_assignment(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn cancel_assignment(origin: OriginFor<T>, collection_id: u32, ntnft_id: u32, target_address: T::AccountId) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::CancelAssignment(something, who));
+			Self::deposit_event(Event::CancelAssignment(who, collection_id, ntnft_id, target_address));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows a collection owner to destroy their collection
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn destroy_collection(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn destroy_collection(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::DestroyCollection(something, who));
+			Self::deposit_event(Event::DestroyCollection(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows a collection owner to mint new ntnfts
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn mint_ntnft(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn mint_ntnft(origin: OriginFor<T>, collection_id: u32, amount: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::MintNTNFT(something, who));
+			Self::deposit_event(Event::MintNTNFT(collection_id, amount, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows a collection owner to burn ntnfts
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn burn_ntnft(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn burn_ntnft(origin: OriginFor<T>, collection_id: u32, amount: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::BurnNTNFT(something, who));
+			Self::deposit_event(Event::BurnNTNFT(collection_id, amount, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows a collection owner to freeze a collection
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn freeze_collection(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn freeze_collection(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::FreezeCollection(something, who));
+			Self::deposit_event(Event::FreezeCollection(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows a collection owner to thaw a collection
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn thaw_collection(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn thaw_collection(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::ThawCollection(something, who));
+			Self::deposit_event(Event::ThawCollection(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// Dispatchable which allows an assigned ntnft holder to discard their ntnft
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn discard_ntnft(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn discard_ntnft(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::DiscardNTNFT(something, who));
+			Self::deposit_event(Event::DiscardNTNFT(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// A dispatchable meant for governance that forces creation of a collection
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn force_create(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn force_create(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::ForceCreate(something, who));
+			Self::deposit_event(Event::ForceCreate(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
 
 		/// A dispatchable meant for governance that forces an update for collection settings
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn force_collection_status(origin: OriginFor<T>, something: u32) -> DispatchResult {
+		pub fn force_collection_status(origin: OriginFor<T>, collection_id: u32) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/v3/runtime/origins
 			let who = ensure_signed(origin)?;
 
 			// Update storage.
-			<Something<T>>::put(something);
+			<Something<T>>::put(collection_id);
 
 			// Emit an event.
-			Self::deposit_event(Event::ForceCollectionStatus(something, who));
+			Self::deposit_event(Event::ForceCollectionStatus(collection_id, who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
