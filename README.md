@@ -52,4 +52,4 @@ Additionally, we have added an optional expiration value which is aimed specific
 * [`Assets`](https://docs.rs/pallet-assets/latest/pallet_assets/)
 * [`Uniques`](https://github.com/paritytech/substrate/tree/master/frame/uniques)
 
-License: MIT
+License: GPLv3
