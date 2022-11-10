@@ -1,6 +1,7 @@
-<Warning>
-*This Pallet is a work in progress.  Currently it is in a state where events are defined and available to be called by extrinsics, but this pallet needs additional work around its storage implementations before it will be fully useful in a finished state.* 
-</Warning>
+> **Warning**  
+> This Pallet is a work in progress, and is currently in an unfinished state.
+> For a look at relevant and current work, please reference the repository for [Ventur](https://github.com/Popular-Coding/ventur)
+
 
 # nt-nft
 Substrate pallet that enables parachains to issue non-transferable non-fungible tokens (nt-nfts). 
